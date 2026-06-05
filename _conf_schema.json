@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "title": "群友识别插件配置",
+  "properties": {
+    "max_chat_history": {
+      "type": "integer",
+      "title": "最大聊天历史条数",
+      "description": "LLM分析外号时使用的最近聊天记录条数",
+      "default": 200,
+      "minimum": 50,
+      "maximum": 2000
+    },
+    "nickname_extraction_interval": {
+      "type": "integer",
+      "title": "外号提取间隔（秒）",
+      "description": "两次外号提取之间的最小间隔，防止频繁调用LLM",
+      "default": 3600,
+      "minimum": 600,
+      "maximum": 86400
+    },
+    "auto_extract_enabled": {
+      "type": "boolean",
+      "title": "启用自动外号提取",
+      "description": "是否在累积足够消息后自动触发LLM外号提取",
+      "default": false
+    },
+    "auto_extract_threshold": {
+      "type": "integer",
+      "title": "自动提取消息阈值",
+      "description": "累积多少条新消息后自动触发外号提取",
+      "default": 500,
+      "minimum": 100,
+      "maximum": 5000
+    },
+    "backup_interval": {
+      "type": "integer",
+      "title": "数据备份间隔（秒）",
+      "description": "自动备份数据的间隔时间",
+      "default": 3600,
+      "minimum": 300,
+      "maximum": 86400
+    },
+    "max_backup_count": {
+      "type": "integer",
+      "title": "最大备份数量",
+      "description": "保留的最大备份文件数量",
+      "default": 10,
+      "minimum": 3,
+      "maximum": 50
+    },
+    "correction_confirm_timeout": {
+      "type": "integer",
+      "title": "修正确认超时（秒）",
+      "description": "管理员修正确认等待的超时时间",
+      "default": 60,
+      "minimum": 15,
+      "maximum": 300
+    },
+    "llm_provider_id_override": {
+      "type": "string",
+      "title": "LLM提供商ID覆写",
+      "description": "指定用于外号提取的LLM提供商ID，留空则使用当前会话默认",
+      "default": ""
+    },
+    "log_level": {
+      "type": "string",
+      "title": "日志级别",
+      "description": "插件日志输出的详细程度",
+      "enum": ["DEBUG", "INFO", "WARNING", "ERROR"],
+      "default": "INFO"
+    }
+  },
+  "required": []
+}

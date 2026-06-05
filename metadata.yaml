@@ -1,0 +1,7 @@
+name: astrbot_plugin_group_member
+desc: 群友识别插件 - 建立群友QQ号与昵称的映射关系，智能提取群友外号/别名，支持管理员交互修正
+author: plugin_dev
+version: 1.0.0
+repo: ""
+display_name: 群友识别
+short_desc: 智能识别群友身份与外号，支持LLM驱动的别名提取
