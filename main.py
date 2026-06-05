@@ -267,9 +267,9 @@ class GroupMemberPlugin(Star):
             return
 
         message_text = event.message_str or ""
-        # 提取命令参数
-        args = message_text.strip().split()
-        args = [a for a in args if not a.startswith("/")]  # 去除指令本身
+        # 提取命令参数（去除指令名本身）
+        args = re.sub(r'^/?qy_info\s*', '', message_text.strip(), flags=re.IGNORECASE).strip().split()
+        args = [a for a in args if a]  # 过滤空字符串
 
         # 检查被@的人
         at_targets = self._get_at_targets(event)
@@ -347,10 +347,8 @@ class GroupMemberPlugin(Star):
             return
 
         message_text = event.message_str or ""
-        args = message_text.strip().split()
-        # 去除指令本身
-        args = [a for a in args if not a.startswith("/")]
-        keyword = " ".join(args) if args else ""
+        # 去除指令名本身
+        keyword = re.sub(r'^/?qy_search\s*', '', message_text.strip(), flags=re.IGNORECASE).strip()
 
         if not keyword:
             yield event.plain_result("❌ 用法: /qy_search <关键词>")
@@ -385,8 +383,9 @@ class GroupMemberPlugin(Star):
             return
 
         message_text = event.message_str or ""
-        args = message_text.strip().split()
-        args = [a for a in args if not a.startswith("/")]
+        # 去除指令名本身，提取参数
+        param_str = re.sub(r'^/?qy_extract\s*', '', message_text.strip(), flags=re.IGNORECASE).strip()
+        args = param_str.split() if param_str else []
 
         # 检查是否有指定QQ号
         target_qq = None
@@ -460,10 +459,9 @@ class GroupMemberPlugin(Star):
             return
 
         message_text = event.message_str or ""
-        # 移除指令前缀
+        # 移除指令前缀（AstrBot 可能已去掉 /，兼容两种格式）
         content = message_text.strip()
-        # 移除 /qy_admin
-        content = re.sub(r'^/qy_admin\s*', '', content, flags=re.IGNORECASE).strip()
+        content = re.sub(r'^/?qy_admin\s*', '', content, flags=re.IGNORECASE).strip()
 
         if not content:
             # 显示管理员帮助
