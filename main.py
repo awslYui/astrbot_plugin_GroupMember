@@ -221,11 +221,16 @@ class GroupMemberPlugin(Star):
         # 惰性启动后台任务
         await self._ensure_tasks_started()
 
-        # 0. 优先检查管理员修正确认（仅处理确认回复，不重复处理命令）
-        result = await self._admin_handler.try_handle_confirmation(event, group_id, message_text)
-        if result is not None:
-            yield event.plain_result(result)
-            return
+        # 0. 优先检查管理员修正确认（仅对非命令消息检测）
+        msg_lower = message_text.strip().lower()
+        is_command = msg_lower.startswith(('/qy_', 'qy_', '/qy', 'qy'))
+        if not is_command:
+            session_key = f"{group_id}_{sender_id}"
+            if session_key in self._admin_handler._pending_confirmations:
+                result = await self._admin_handler.process_admin_command(event, group_id, message_text)
+                if result is not None:
+                    yield event.plain_result(result)
+                    return
 
         # 1. 更新群友身份映射（检测昵称变化）
         await self._data_manager.update_member(group_id, sender_id, sender_name)
