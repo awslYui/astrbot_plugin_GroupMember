@@ -4,10 +4,11 @@
 """
 
 import asyncio
+import json
 import os
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star
@@ -25,17 +26,18 @@ PLUGIN_NAME = "astrbot_plugin_group_member"
 class GroupMemberPlugin(Star):
     """群友识别插件主类"""
 
-    def __init__(self, context: Context, config: Optional[dict] = None):
+    def __init__(self, context: Context, config: Optional[Union[dict, str]] = None):
         super().__init__(context)
-        self._config = config or {}
+        self._config = self._parse_config(config)
 
         # 尝试从 AstrBot 配置系统加载插件配置
         try:
             plugin_config = self.context.get_config()
             if plugin_config:
-                self._config = {**self._config, **plugin_config}
-        except Exception:
-            pass
+                parsed = self._parse_config(plugin_config)
+                self._config = {**self._config, **parsed}
+        except Exception as e:
+            logger.debug(f"[群友识别] 从 context 加载配置跳过: {e}")
 
         # 插件目录
         self._plugin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -62,6 +64,25 @@ class GroupMemberPlugin(Star):
             pass
 
     # ==================== 生命周期 ====================
+
+    @staticmethod
+    def _parse_config(config) -> dict:
+        """安全解析配置，兼容 dict 和 JSON 字符串"""
+        if config is None:
+            return {}
+        if isinstance(config, dict):
+            return config
+        if isinstance(config, str):
+            try:
+                return json.loads(config)
+            except (json.JSONDecodeError, TypeError):
+                logger.warning(f"[群友识别] 无法解析配置字符串，使用默认配置")
+                return {}
+        # 其他类型，尝试转换为 dict
+        try:
+            return dict(config) if config else {}
+        except (TypeError, ValueError):
+            return {}
 
     async def _ensure_tasks_started(self):
         """确保后台任务已启动"""
