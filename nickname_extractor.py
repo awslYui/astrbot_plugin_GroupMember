@@ -165,8 +165,16 @@ class NicknameExtractor:
 
     async def _call_llm(self, context, prompt: str) -> Optional[str]:
         """调用LLM接口"""
+        provider_id = self._config.get("llm_provider_id_override", "") or None
+        if not provider_id:
+            logger.error(
+                "[群友识别] 未配置 LLM 提供商ID。请在插件配置中设置「LLM提供商ID覆写」字段。\n"
+                "   可在 AstrBot WebUI → 插件管理 → 群友识别 → 配置 中查看已配置的 LLM 提供商。"
+            )
+            return None
+
         try:
-            llm_resp = await context.llm_generate(prompt=prompt)
+            llm_resp = await context.llm_generate(prompt=prompt, chat_provider_id=provider_id)
             if llm_resp and hasattr(llm_resp, "completion_text"):
                 return llm_resp.completion_text
             elif isinstance(llm_resp, str):
